@@ -1,21 +1,22 @@
 import React from 'react';
-import Regl, { Draw } from 'react-regl';
+import useFetch from "react-fetch-hook";
 import './App.css'
+import Regl, { Draw } from 'react-regl';
+import mainVertUrl from './main.vert'
+import mainFragUrl from './main.frag'
 
-let vertShader = `
-precision mediump float;
-attribute vec2 position;
-void main() {
-  gl_Position = vec4(position, 0, 1);
-}`
-let fragShader = `
-precision mediump float;
-uniform vec4 color;
-void main() {
-  gl_FragColor = color;
-}`
+let rawLoaderFetcherOpts = {
+  formatter: (response) => response.text()
+}
 
 function App() {
+  const { data: mainVert } = useFetch(mainVertUrl, rawLoaderFetcherOpts);
+  const { data: mainFrag } = useFetch(mainFragUrl, rawLoaderFetcherOpts);
+  if (!mainVert || !mainFrag) {
+    return (
+      <div>Loading...</div>
+    )
+  }
   return (
     <Regl
       width={window.innerWidth}
@@ -23,8 +24,8 @@ function App() {
       color={[0, 0, 0, 1]}
     >
       <Draw
-        vert={vertShader}
-        frag={fragShader}
+        vert={mainVert}
+        frag={mainFrag}
         attributes={{
           position: [[-0.5, 0],[0, -0.5],[0.25, 1]]
         }}
