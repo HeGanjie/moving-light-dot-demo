@@ -18,6 +18,7 @@ let rawLoaderFetcherOpts = {
 // 1. 点光源
 // 2. HDR
 // 3. Bloom
+// 4. motion blur
 
 function App() {
   const { data: mainVert } = useFetch(mainVertUrl, rawLoaderFetcherOpts);
