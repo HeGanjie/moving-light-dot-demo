@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useRef, useState} from 'react'
 import useFetch from 'react-fetch-hook'
 import './App.css'
 import Regl from 'react-regl'
@@ -22,6 +22,7 @@ let rawLoaderFetcherOpts = {
 function App() {
   const { data: mainVert } = useFetch(mainVertUrl, rawLoaderFetcherOpts);
   const { data: mainFrag } = useFetch(mainFragUrl, rawLoaderFetcherOpts);
+  const selfRef = useRef()
 
   const [camera, setCamera] = useState(() => ({
     position: vec3.fromValues(0, 0, 10),
@@ -70,10 +71,21 @@ function App() {
   }
   return (
     <Regl
+      ref={selfRef}
       width={window.innerWidth}
       height={window.innerHeight}
       color={[0, 0, 0, 1]}
-      forceRedrawOnTick
+      onFrame={() => {
+        if (!selfRef.current) {
+          return
+        }
+        let self = selfRef.current
+        self.regl.clear({
+          color: self.props.color || [0, 0, 0, 1],
+          depth: self.props.depth || 1
+        });
+        self.rootNode.containerInfo.render();
+      }}
     >
       <DrawScene
         mainVert={mainVert}
