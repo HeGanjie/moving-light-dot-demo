@@ -26,7 +26,7 @@ export function DrawScene(props) {
           return [color.r, color.g, color.b]
         }))
         let elements = _.flatMap(faces, (f, fIdx) => {
-          let offset = _.sumBy(_.take(faces, fIdx), f => f.data.length); // TODO optimize by reduce
+          let offset = faces.reduce((acc, currFace, i) => i < fIdx ? acc + currFace.data.length : acc, 0)
           return f.triangleIndices.map(ti => ti + offset)
         })
         return (
@@ -35,12 +35,22 @@ export function DrawScene(props) {
             vert={mainVert}
             frag={mainFrag}
             attributes={{
-              a_position: _.chunk(posData, 3),
-              a_color: _.chunk(colorData, 3)
+              a_position: posData,
+              a_color: colorData
             }}
-            elements={_.chunk(elements, 3)}
+            elements={elements}
             uniforms={{
-              u_mvp: mat4.multiply(mat4.create(), proj_w2c, mTransform)
+              u_mvp: mesh.name !== 'triangle'
+                ? mat4.multiply(mat4.create(), proj_w2c, mTransform)
+                : ({tick}) => {
+                  let theta = tick / 100
+                  let rotation0 = vec3.fromValues(0, 0, theta % (2 * Math.PI) * 180 / Math.PI)
+                  let position0 = vec3.fromValues(5 * Math.cos(theta), 5 * Math.sin(theta), 0.1)
+
+                  let qRot = quat.fromEuler(quat.create(), ...rotation0)
+                  let mTransform = mat4.fromRotationTranslationScale(mat4.create(), qRot, position0, scale);
+                  return mat4.multiply(mat4.create(), proj_w2c, mTransform)
+                }
             }}
           />
         )

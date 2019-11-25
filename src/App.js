@@ -14,6 +14,11 @@ let rawLoaderFetcherOpts = {
   formatter: (response) => response.text()
 }
 
+// 0. Animation
+// 1. 点光源
+// 2. HDR
+// 3. Bloom
+
 function App() {
   const { data: mainVert } = useFetch(mainVertUrl, rawLoaderFetcherOpts);
   const { data: mainFrag } = useFetch(mainFragUrl, rawLoaderFetcherOpts);
@@ -58,20 +63,6 @@ function App() {
     ]
   })
 
-  useEffect(() => {
-    const startAt = Date.now()
-    const timerId = setInterval(() => {
-      const elapse = Date.now() - startAt
-      let theta = elapse / 1000
-      let next = [...meshes]
-      next[1].position = vec3.fromValues(5 * Math.cos(theta), 5 * Math.sin(theta), 0.1)
-      setMeshes(next)
-    }, 1000/30)
-    return function () {
-      clearInterval(timerId)
-    }
-  }, [])
-
   if (!mainVert || !mainFrag) {
     return (
       <div>Loading...</div>
@@ -82,6 +73,7 @@ function App() {
       width={window.innerWidth}
       height={window.innerHeight}
       color={[0, 0, 0, 1]}
+      forceRedrawOnTick
     >
       <DrawScene
         mainVert={mainVert}
